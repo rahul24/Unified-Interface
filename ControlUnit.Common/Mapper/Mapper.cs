@@ -29,7 +29,7 @@ namespace ControlUnit.Common.Mapper
                     Confidence = webhookRequest.QueryResult.IntentDetectionConfidence,
                     Intent = GetIntent(webhookRequest.QueryResult.Intent.DisplayName),
                     Tokens = GetTokens(webhookRequest.QueryResult.Parameters.Fields),
-                    Payload = webhookRequest?.QueryResult?.WebhookPayload?.ToString()
+                    Payload = webhookRequest?.OriginalDetectIntentRequest?.Payload?.ToString()
                 }; 
             }
 
@@ -43,6 +43,10 @@ namespace ControlUnit.Common.Mapper
             {
                 intent = "ControlUnit.Intent.WelcomeIntent";
             }
+            else if (displayName.ToLower().Contains("buycloth"))
+            {
+                intent = "ControlUnit.Intent.BuyCloth";
+            }
 
             return intent;
         }
@@ -50,14 +54,14 @@ namespace ControlUnit.Common.Mapper
         private static IDictionary<string, string> GetTokens(MapField<string, Value> fields)
         {
             IDictionary<string, string> collection = new Dictionary<string, string>();
-            foreach (var item in fields.Values)
+            foreach (var item in fields)
             {
-                if (item.ListValue?.Values?.Count > 0)
+                if (!string.IsNullOrEmpty(item.Value.StringValue))
                 {
-                    if (!collection.ContainsKey(item.ListValue.Values[0].StringValue))
-                        collection.Add(item.ListValue.Values[0].StringValue, item.ListValue.Values[1].StringValue);
+                    if (!collection.ContainsKey(item.Key))
+                        collection.Add(item.Key, item.Value.StringValue);
                     else
-                        collection[item.ListValue.Values[0].StringValue] += "," + item.ListValue.Values[1].StringValue;
+                        collection[item.Key] += "," + item.Value.StringValue;
                 }
             }
 

@@ -13,12 +13,12 @@ using ControlUnit.Intent;
 
 namespace ControlUnit
 {
-    public static class PriceStore
+    public static class UnifaceStore
     {
         private static readonly JsonParser jsonParser =
             new JsonParser(JsonParser.Settings.Default.WithIgnoreUnknownFields(true));
 
-        [FunctionName("PriceStore")]
+        [FunctionName("UniFaceStore")]
         public static async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)] HttpRequest req,
             ILogger log)
