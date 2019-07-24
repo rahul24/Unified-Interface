@@ -7,6 +7,10 @@ using System.Linq;
 using Google.Protobuf.Collections;
 using Google.Protobuf.WellKnownTypes;
 using ControlUnit.Common.Extension;
+using Alexa.NET.Request.Type;
+using Alexa.NET.Request;
+using Alexa.NET.Response;
+using Alexa.NET;
 
 namespace ControlUnit.Common.Mapper
 {
@@ -30,10 +34,26 @@ namespace ControlUnit.Common.Mapper
                     Intent = GetIntent(webhookRequest.QueryResult.Intent.DisplayName),
                     Tokens = GetTokens(webhookRequest.QueryResult.Parameters.Fields),
                     Payload = webhookRequest?.OriginalDetectIntentRequest?.Payload?.ToString()
-                }; 
+                };
+            }
+            else if (requestBody.Contains("amzn"))
+            {
+                var skillrequest = requestBody.ConvertToAlexaDialog();
+                model = new CommonModel()
+                {
+                    Id = skillrequest.Request.RequestId,
+                    Source = "amazon",
+                    Version = skillrequest.Version,
+                    Query = string.Empty,
+                    Session = skillrequest.Session.SessionId,
+                    Confidence = 0,
+                    Intent = GetIntent((skillrequest.Request as IntentRequest).Intent.Name),
+                    Tokens = GetTokens((skillrequest.Request as IntentRequest).Intent.Slots),
+                    Payload = string.Empty
+                };
             }
 
-            return model;
+                return model;
         }
 
         private static string GetIntent(string displayName)
@@ -68,6 +88,23 @@ namespace ControlUnit.Common.Mapper
             return collection;
         }
 
+        private static IDictionary<string, string> GetTokens(IDictionary<string,Slot> fields)
+        {
+            IDictionary<string, string> collection = new Dictionary<string, string>();
+            foreach (var item in fields)
+            {
+                if (!string.IsNullOrEmpty(item.Value.Value)) //&& item.Value.ConfirmationStatus.ToLower().Equals("user"))
+                {
+                    if (!collection.ContainsKey(item.Key))
+                        collection.Add(item.Key, item.Value.Value);
+                    else
+                        collection[item.Key] += "," + item.Value.Value;
+                }
+            }
+
+            return collection;
+        }
+
 
         public static T Convert<T>(CommonModel model)
         {
@@ -79,6 +116,18 @@ namespace ControlUnit.Common.Mapper
                 {
                     FulfillmentText = model.ResponseString
                 };
+            }
+            else if (model.Source.Equals("amazon"))
+            {
+                result =  ResponseBuilder.Tell(model.ResponseString);
+
+                //new ResponseBody()
+                //{
+                //    Reprompt = new Reprompt(model.ResponseString),
+                //    ShouldEndSession = false,
+                //},
+                //Version = model.Version
+            
             }
 
             return (T)result;

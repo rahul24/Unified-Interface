@@ -2,12 +2,13 @@
 using Google.Protobuf;
 using System;
 using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
+using Alexa.NET.Request;
+using Newtonsoft.Json;
+using Alexa.NET.Response;
 
 namespace ControlUnit.Common.Extension
 {
-    public static class DialogflowExtension
+    public static class DialogExtension
     {
         // A Protobuf JSON parser configured to ignore unknown fields. This make
         // the action robust against new fields being introduced by Dialogflow.
@@ -22,6 +23,21 @@ namespace ControlUnit.Common.Extension
         public static string ConvertDialogflow(this WebhookResponse webhookResponse)
         {
             return webhookResponse.ToString();
+        }
+
+        public static SkillRequest ConvertToAlexaDialog(this string requestBody)
+        {
+            SkillRequest request = JsonConvert.DeserializeObject<SkillRequest>(requestBody);
+            return request;
+        }
+
+        public static string ConvertAlexaDialog(this SkillResponse skillResponse)
+        {
+            string response = JsonConvert.SerializeObject(skillResponse, new JsonSerializerSettings
+            {
+                NullValueHandling = NullValueHandling.Include
+            });
+            return response;
         }
 
     }
