@@ -6,7 +6,7 @@
   <ItemGroup>
     <PackageReference Include="Alexa.NET" Version="1.7.0" />
     <PackageReference Include="Google.Cloud.Diagnostics.AspNetCore" Version="2.0.1" />
-    <PackageReference Include="Google.Protobuf" Version="3.8.0" />
+    <PackageReference Include="Google.Protobuf" Version="3.15.0" />
     <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="1.0.29" />
   </ItemGroup>
   <ItemGroup>
